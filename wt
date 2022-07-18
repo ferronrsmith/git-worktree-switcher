@@ -4,12 +4,12 @@ set -e
 # Switch between git worktrees with speed.
 
 args=("$@")
-VERSION="0.1.0"
+VERSION="0.2.0"
 TMP_PATH=$(mktemp)
 BINARY_PATH=$(which wt)
 JQ_URL="https://stedolan.github.io/jq/download"
-RELEASE_URL="https://github.com/yankeexe/git-worktree-switcher/releases/latest"
-RELEASE_API_URL="https://api.github.com/repos/yankeexe/git-worktree-switcher/releases/latest"
+RELEASE_URL="https://github.com/ferronrsmith/git-worktree-switcher/releases/latest"
+RELEASE_API_URL="https://api.github.com/repos/ferronrsmith/git-worktree-switcher/releases/latest"
 
 
 # Escape forward slash
@@ -83,16 +83,16 @@ if [ -z "${args[0]}" ]; then
 fi
 
 case "${args[0]}" in
-list)
+list | ls | l)
 	worktree_list
 	;;
-update)
+update | u)
 	update
 	;;
-help)
+help | h)
 	help_message
 	;;
-version)
+version | v)
 	echo Version: $VERSION
 	;;
 -)
