@@ -10,7 +10,7 @@ BINARY_PATH=$(which wt)
 JQ_URL="https://stedolan.github.io/jq/download"
 RELEASE_URL="https://github.com/ferronrsmith/git-worktree-switcher/releases/latest"
 RELEASE_API_URL="https://api.github.com/repos/ferronrsmith/git-worktree-switcher/releases/latest"
-
+dirfile="$HOME/.wt.dir"
 
 # Escape forward slash
 arg=$(echo "${args[0]}" | sed 's/\//\\\//g')
@@ -31,14 +31,15 @@ help_message() {
 }
 
 goto_main_worktree() {
-	main_worktree=$(git worktree list --porcelain | awk '{print $0; exit}' | grep -oP '(?<=worktree ).*')
+	main_worktree=$(git worktree list --porcelain | awk '{sub("worktree ", ""); print; exit}')
 
 	if [ -z "$main_worktree" ]; then
 		:
 	else
 		echo Changing to main worktree at: "$main_worktree"
 		cd "$main_worktree"
-		exec $SHELL
+		# exec $SHELL
+		echo "$main_worktree" > "$dirfile"
 	fi
 }
 
@@ -83,8 +84,16 @@ if [ -z "${args[0]}" ]; then
 fi
 
 case "${args[0]}" in
+add | a)
+	git worktree add --track -B "${args[1]}" ".workspaces/${args[1]}"
+	;;
 list | ls | l)
 	worktree_list
+	;;
+rem | rm | r)
+	# shift;
+	wk="${args[1]}"
+	rmdir=$(git worktree list --porcelain | awk '/^worktree .*'"$wk"'/ {sub("worktree ", ""); print; exit}')
 	;;
 update | u)
 	update
@@ -99,7 +108,7 @@ version | v)
 	goto_main_worktree
 	;;
 *)
-	directory=$(git worktree list --porcelain | awk '/'"$arg"'/ {print; exit}' | grep -oP '(?<=worktree ).*')
+	directory=$(git worktree list --porcelain | awk '/^worktree .*'"$arg"'/ {sub("worktree ", ""); print; exit}')
 	;;
 esac
 
@@ -107,7 +116,8 @@ esac
 change_worktree() {
 	echo Changing to worktree at: "$directory"
 	cd "$directory"
-	exec $SHELL
+	# exec $SHELL
+	echo "$directory" > "$dirfile"
 }
 
 # If directory variable is not empty then change worktree
@@ -115,4 +125,16 @@ if [ -z "$directory" ]; then
 	:
 else
 	change_worktree
+fi
+
+
+# If directory variable is not empty then change worktree
+if [ -z "$rmdir" ]; then
+	:
+else
+	rm -rf "$rmdir"
+	# automatically prune
+	git worktree prune
+	# remove branch
+	git branch -d "$wk"
 fi
