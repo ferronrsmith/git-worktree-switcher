@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-set -e
 
 # Switch between git worktrees with speed.
-
 args=("$@")
 VERSION="0.2.0"
 TMP_PATH=$(mktemp)
@@ -10,6 +8,7 @@ BINARY_PATH=$(which wt)
 JQ_URL="https://stedolan.github.io/jq/download"
 RELEASE_URL="https://github.com/ferronrsmith/git-worktree-switcher/releases/latest"
 RELEASE_API_URL="https://api.github.com/repos/ferronrsmith/git-worktree-switcher/releases/latest"
+dirfile="$HOME/.wt.dir"
 
 # Escape forward slash
 arg=$(echo "${args[0]}" | sed 's/\//\\\//g')
@@ -36,6 +35,7 @@ goto_main_worktree() {
 		:
 	else
 		echo Changing to main worktree at: "$main_worktree"
+		echo "$main_worktree" > "$dirfile"
 		cd "$main_worktree"
 	fi
 }
@@ -112,6 +112,7 @@ esac
 # Change worktree based on user argument.
 change_worktree() {
 	echo Changing to worktree at: "$directory"
+	echo "$directory" > "$dirfile"
 	cd "$directory"
 }
 
