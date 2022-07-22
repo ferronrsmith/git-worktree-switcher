@@ -82,7 +82,8 @@ fi
 
 case "${args[0]}" in
 add | a)
-	git worktree add --track -B "${args[1]}" ".workspaces/${args[1]}"
+	bb=$(echo "${args[1]}" | tr / -)
+	git worktree add --track -B "${args[1]}" ".workspaces/$bb"
 	;;
 list | ls | l)
 	worktree_list
@@ -128,9 +129,10 @@ fi
 if [ -z "$rmdir" ]; then
 	:
 else
+	echo removing worktree at: "$rmdir"
 	rm -rf "$rmdir"
 	# automatically prune
 	git worktree prune
 	# remove branch
-	git branch -d "$wk"
+	git branch -d "$wk" 2>/dev/null
 fi
